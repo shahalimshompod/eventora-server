@@ -31,6 +31,12 @@ async function run() {
 
     // OPERATIONS
     // GET OPERATIONS
+    // get operations for featured events
+    app.get("/featured-events", async (req, res) => {
+      const query = { featured: true };
+      const result = await allEvents.find(query).limit(3).toArray();
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
