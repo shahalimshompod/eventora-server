@@ -61,6 +61,28 @@ async function run() {
       const result = await allEvents.findOne(query);
       res.send(result);
     });
+
+    // POST OPERATION
+    app.post("/post-user", async (req, res) => {
+      const user = req.body;
+      const email = user?.email;
+      const query = { email: email };
+      const existingUser = await users.findOne(query);
+
+      // checking if user exist
+      if (existingUser) {
+        return res.send({ message: "USER ALREADY EXISTS", insertedId: null });
+      }
+
+      // user to be added
+      const userToBeAdded = {
+        ...user,
+        createdAt: new Date(),
+      };
+
+      const result = await users.insertOne(userToBeAdded);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
