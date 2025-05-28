@@ -28,6 +28,7 @@ async function run() {
     const allEvents = client.db("Eventora").collection("all-events");
     const reviews = client.db("Eventora").collection("reviews");
     const users = client.db("Eventora").collection("users");
+    const bookings = client.db("Eventora").collection("bookings");
 
     // OPERATIONS
     // GET OPERATIONS
@@ -62,6 +63,16 @@ async function run() {
       res.send(result);
     });
 
+    // get data for users
+    app.get("/users", async (req, res) => {
+      const email = req.query.email;
+      console.log(email);
+      const query = {email: email};
+      const result = await users.findOne(query)
+      console.log(result);
+      res.send(result);
+    });
+
     // POST OPERATION
     app.post("/post-user", async (req, res) => {
       const user = req.body;
@@ -77,10 +88,44 @@ async function run() {
       // user to be added
       const userToBeAdded = {
         ...user,
+        role: null,
         createdAt: new Date(),
       };
 
       const result = await users.insertOne(userToBeAdded);
+      res.send(result);
+    });
+
+    app.post("/post-booking", async (req, res) => {
+      const bookingData = req.body;
+      if (!bookingData) {
+        return res.send({ message: "Something went wrong", insertedId: null });
+      }
+
+      const finalData = {
+        ...bookingData,
+        createdAt: new Date(),
+      };
+
+      const result = await bookings.insertOne(finalData);
+      res.send(result);
+    });
+
+    // Put operations
+    app.put("/changed-ticket-amount/:id", async (req, res) => {
+      const { newTicketAmount } = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const finalData = {
+        availableSeats: newTicketAmount,
+      };
+
+      const updatedDoc = {
+        $set: finalData,
+      };
+
+      const result = await allEvents.updateOne(query, updatedDoc);
       res.send(result);
     });
   } finally {
